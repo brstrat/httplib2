@@ -13,7 +13,7 @@ are permitted provided that the following conditions are met:
 3. Neither the name of Dan Haim nor the names of his contributors may be used
    to endorse or promote products derived from this software without specific
    prior written permission.
-
+   
 THIS SOFTWARE IS PROVIDED BY DAN HAIM "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
@@ -143,15 +143,15 @@ class socksocket(socket.socket):
         return data
 
     def sendall(self, content, *args):
-        """ override socket.socket.sendall method to rewrite the header
-        for non-tunneling proxies if needed
+        """ override socket.socket.sendall method to rewrite the header 
+        for non-tunneling proxies if needed 
         """
         if not self.__httptunnel:
             content = self.__rewriteproxy(content)
         return super(socksocket, self).sendall(content, *args)
 
     def __rewriteproxy(self, header):
-        """ rewrite HTTP request headers to support non-tunneling proxies
+        """ rewrite HTTP request headers to support non-tunneling proxies 
         (i.e. those which do not support the CONNECT method).
         This only works for HTTP (not HTTPS) since HTTPS requires tunneling.
         """
@@ -162,7 +162,7 @@ class socksocket(socket.socket):
                 host = hdr
             elif hdr.lower().startswith("get") or hdr.lower().startswith("post"):
                 endpt = hdr
-        if host and endpt:
+        if host and endpt: 
             hdrs.remove(host)
             hdrs.remove(endpt)
             host = host.split(" ")[1]
@@ -177,7 +177,7 @@ class socksocket(socket.socket):
         auth = self.__proxy[4] + ":" + self.__proxy[5]
         return "Proxy-Authorization: Basic " + base64.b64encode(auth)
 
-    def setproxy(self, proxytype=None, addr=None, port=None, rdns=True, username=None, password=None, headers=None):
+    def setproxy(self, proxytype=None, addr=None, port=None, rdns=True, username=None, password=None):
         """setproxy(proxytype, addr[, port[, rdns[, username[, password]]]])
         Sets the proxy to be used.
         proxytype -    The type of the proxy to be used. Three types
@@ -193,9 +193,8 @@ class socksocket(socket.socket):
                 The default is no authentication.
         password -    Password to authenticate with to the server.
                 Only relevant when username is also provided.
-        headers -     Additional or modified headers for the proxy connect request.
         """
-        self.__proxy = (proxytype, addr, port, rdns, username, password, headers)
+        self.__proxy = (proxytype, addr, port, rdns, username, password)
 
     def __negotiatesocks5(self, destaddr, destport):
         """__negotiatesocks5(self,destaddr,destport)
@@ -366,17 +365,8 @@ class socksocket(socket.socket):
         else:
             addr = destaddr
         headers =  ["CONNECT ", addr, ":", str(destport), " HTTP/1.1\r\n"]
-        wrote_host_header = False
-        wrote_auth_header = False
-        if self.__proxy[6] != None:
-            for key, val in self.__proxy[6].iteritems():
-                headers += [key, ": ", val, "\r\n"]
-                wrote_host_header = (key.lower() == "host")
-                wrote_auth_header = (key.lower() == "proxy-authorization")
-        if not wrote_host_header:
-            headers += ["Host: ", destaddr, "\r\n"]
-        if not wrote_auth_header:
-            if (self.__proxy[4] != None and self.__proxy[5] != None):
+        headers += ["Host: ", destaddr, "\r\n"]
+        if (self.__proxy[4] != None and self.__proxy[5] != None):
                 headers += [self.__getauthheader(), "\r\n"]
         headers.append("\r\n")
         self.sendall("".join(headers).encode())
@@ -409,7 +399,7 @@ class socksocket(socket.socket):
         To select the proxy server use setproxy().
         """
         # Do a minimal input check first
-        if (not type(destpair) in (list,tuple)) or (len(destpair) < 2) or (not isinstance(destpair[0], basestring)) or (type(destpair[1]) != int):
+        if (not type(destpair) in (list,tuple)) or (len(destpair) < 2) or (type(destpair[0]) != type('')) or (type(destpair[1]) != int):
             raise GeneralProxyError((5, _generalerrors[5]))
         if self.__proxy[0] == PROXY_TYPE_SOCKS5:
             if self.__proxy[2] != None:
